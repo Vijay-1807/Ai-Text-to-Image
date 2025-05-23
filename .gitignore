@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 node_modules/
 .env
 # Dependencies
@@ -14,9 +14,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-=======
+
 node_modules/
->>>>>>> f94b7f6decff784624f0eadfce621656bc8007d0
 
 Thumbs.db
 
