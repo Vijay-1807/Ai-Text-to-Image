@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Define the character encoding and viewport settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Page title -->
+    <title>Vijay's AI Image Generator</title>
+    
+    <!-- Link to external CSS file for styling -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            YOurs
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Login function
+        window.login = async function(email, password) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Logged in:", userCredential.user);
+                showSuccessMessage('Successfully logged in!');
+            } catch (error) {
+                console.error("Login failed:", error.message);
+                document.getElementById('auth-error').textContent = error.message;
+            }
+        }
+
+        // Register function
+        window.register = async function(email, password) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Registered:", userCredential.user);
+                showSuccessMessage('Account created successfully!');
+            } catch (error) {
+                console.error("Registration failed:", error.message);
+                document.getElementById('auth-error').textContent = error.message;
+            }
+        }
+
+        // Google Sign-in function
+        window.signInWithGoogle = async function() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                console.log("Google user:", result.user);
+                showSuccessMessage('Successfully signed in with Google!');
+            } catch (error) {
+                console.error("Google sign-in error:", error.message);
+                document.getElementById('auth-error').textContent = error.message;
+            }
+        }
+
+        // Sign out function
+        window.signOut = async function() {
+            try {
+                await signOut(auth);
+                showSuccessMessage('Successfully signed out!');
+            } catch (error) {
+                console.error("Sign out error:", error.message);
+            }
+        }
+
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+            const authContainer = document.getElementById('auth-container');
+            const mainContent = document.getElementById('main-content');
+            const userInfoSpan = document.getElementById('user-info');
+            const signOutBtn = document.getElementById('sign-out-btn');
+
+            if (user) {
+                authContainer.style.display = 'none';
+                mainContent.style.display = 'flex'; // Keep flex for main content layout
+                userInfoSpan.textContent = `Welcome, ${user.email || user.displayName}!`;
+                signOutBtn.style.display = 'block';
+            } else {
+                authContainer.style.display = 'flex';
+                mainContent.style.display = 'none';
+                userInfoSpan.textContent = '';
+                signOutBtn.style.display = 'none';
+                document.getElementById('login-form-section').style.display = 'block';
+                document.getElementById('register-form-section').style.display = 'none';
+            }
+        });
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Authentication Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-box">
+            
+            <!-- Login Form Section -->
+            <div id="login-form-section">
+                 <h2>🤖 Login</h2>
+                <div id="auth-error" class="auth-error"></div>
+                <form id="login-form" class="auth-form">
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="email" id="login-email" placeholder="Username" required>
+                    </div>
+                    <div class="input-group">
+                         <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="login-password" placeholder="Password" required>
+                    </div>
+                    <div class="options">
+                        <label>
+                            <input type="checkbox" id="remember-me">
+                            Remember me
+                        </label>
+                    </div>
+                   
+                    <button type="submit" class="auth-button">Login</button>
+                </form>
+                 <div class="auth-divider">
+                    <span>or</span>
+                </div>
+                <button onclick="window.signInWithGoogle()" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-icon">
+                    <span>Sign in with Google</span>
+                  </button>                  
+                <p>Don't have an account? <a href="#" id="show-register">Create Account</a></p>
+            </div>
+
+            <!-- Register Form Section -->
+            <div id="register-form-section" style="display: none;">
+                <h2>Create Account</h2>
+                 <div id="auth-error" class="auth-error"></div>
+                <form id="register-form" class="auth-form">
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="email" id="register-email" placeholder="Email" required>
+                    </div>
+                     <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="register-password" placeholder="Password" required>
+                    </div>
+                     <div class="input-group">
+                         <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Register</button>
+                </form>
+                 <div class="auth-divider">
+                    <span>or</span>
+                </div>
+                <button onclick="window.signInWithGoogle()" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-icon">
+                    <span>Sign in with Google</span>
+                  </button>
+                  
+                <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div id="main-content" class="main-container" style="display: none;">
+        <!-- User Bar - Moved outside the main .container -->
+        <div class="user-bar">
+            <span id="user-info"></span>
+            <button id="sign-out-btn" onclick="window.signOut()" class="sign-out-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Sign Out
+            </button>
+        </div>
+        
+        <!-- Container for the heading and form -->
+        <div class="container">
+            
+            <!-- Section for page headings -->
+            <div class="headings-container">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1 class="imagecenter">AI IMAGE GENERATOR</h1>
+
+                </div>
+                <h2 class="heading" style="color: rgb(0, 208, 255);">Transform Ideas Into Art</h2>
+                <h5 class="sub-heading">
+                    Type what you imagine — our AI will bring it to life
+                </h5>
+            </div>
+
+            <!-- Form container for input and submit button -->
+            <div class="form-container">
+                <form class="my-form" id="image-form">
+                    <div class="input-wrapper">
+                        <div class="input-group">
+                            <i class="fas fa-magic input-icon"></i>
+                            <input id="input-value" 
+                                   placeholder="Describe your image in detail..." 
+                                   type="text"
+                                   class="form-input form-controls"
+                                   required>
+                        </div>
+                        <button type="submit" 
+                                class="image-generate-btn form-controls">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            Generate
+                        </button>
+                    </div>
+                    <div class="suggestions">
+                        <p><br>Try these examples:</p>
+                        <div class="suggestion-chips">
+                            <button type="button" class="chip">a magical forest with glowing mushrooms</button>
+                            <button type="button" class="chip">a futuristic city with flying cars</button>
+                            <button type="button" class="chip">a cute robot playing with kittens</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Section to display the generated image -->
+            <div id="images-visible" class="image-container">
+                <div class="loading-spinner" id="loading-spinner">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Creating your masterpiece...</p>
+                </div>
+                <p id="imageContainerText"></p>
+                <div class="glass-wrapper">
+                    <div class="image-wrapper">
+                        <img id="generated-image" 
+                             class="my-generated-image" 
+                             src='' alt="Generated Image">
+                        <div class="image-actions">
+                            <button class="action-btn download-btn">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keep existing AI objects and robot outside the main container -->
+        <div class="ai-objects">
+            <div class="neural-network" style="top: 20%; left: 10%;"></div>
+            <div class="circuit-pattern" style="top: 60%; right: 15%;"></div>
+            <div class="ai-cube" style="top: 30%; right: 25%;"></div>
+            <div class="data-particles"></div>
+            <div class="neural-network" style="bottom: 15%; left: 20%;"></div>
+            <div class="circuit-pattern" style="top: 15%; right: 30%;"></div>
+            <div class="ai-cube" style="bottom: 25%; right: 10%;"></div>
+        </div>
+        <div class="floating-robot"></div>
+    </div>
+
+    <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    color: var(--text-muted);
+    padding: 15px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    z-index: 1000;
+    text-align: center;
+    border-top: 1px solid rgba(99, 102, 241, 0.2);">
+    &copy; 2025. Developed by 
+    <a href="https://in.linkedin.com/in/bonthavijay" target="_blank" style="color: #00c2f8; font-weight: bold; text-decoration: none;">
+      Vijay Bontha
+    </a>. 
+    Contact: <a href="mailto:bonthavijay1807@gmail.com" style="color:#00c2f8; text-decoration:none;">bonthavijay1807@gmail.com</a>
+    </footer>
+  
+    <script src="index.js"></script>
+</body>
+
+</html>
