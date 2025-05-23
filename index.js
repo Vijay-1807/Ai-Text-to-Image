@@ -386,4 +386,4 @@ formInput.addEventListener('blur', () => {
 imageGenerated.addEventListener('error', () => {
     showError('Failed to load the image. Please try again.');
 });
->>>>>>> f94b7f6decff784624f0eadfce621656bc8007d0
+
